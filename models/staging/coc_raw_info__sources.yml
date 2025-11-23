@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: coc_raw_info
+    database: COC_DEV_BRONZE_DB
+    schema: COC_RAW_INFO
+    tables:
+      - name: clan_raw
+      - name: warlog_raw
+      - name: currentwar_raw
+      - name: player_raw
+      - name: attack_raw
