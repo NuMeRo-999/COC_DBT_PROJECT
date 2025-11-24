@@ -1,72 +1,13 @@
 version: 2
 
 models:
-  - name: clan
-    config:
-      contract:
-        enforced: true
-    description: >
-      Staging table for clan data extracted from raw JSON.
-    columns:
-      - name: clan_id
-        data_type: varchar
-        constraints:
-          - type: not_null
-        description: >
-          Unique identifier for the clan.
-        data_tests:
-          - not_null
-          - unique
-      - name: name
-        data_type: varchar
-        description: >
-          Name of the clan.
-      - name: type
-        data_type: varchar
-        description: >
-          Type of clan (open, closed, etc.).
-      - name: description
-        data_type: text
-        description: >
-          Clan description.
-      - name: clan_level
-        data_type: int
-        description: >
-          Current level of the clan.
-      - name: clan_points
-        data_type: int
-        description: >
-          Total clan points.
-      - name: war_wins
-        data_type: int
-        description: >
-          Total war wins.
-      - name: war_losses
-        data_type: int
-        description: >
-          Total war losses.
-      - name: members
-        data_type: int
-        description: >
-          Number of clan members.
-      - name: ingest_ts
-        data_type: timestamp
-        constraints:
-          - type: not_null
-        description: >
-          Timestamp when data was ingested.
-
-  - name: player
-    config:
-      contract:
-        enforced: true
+  # Modelos incrementales (sin contracts)
+  - name: stg_coc_info__player
     description: >
       Staging table for player data extracted from raw JSON.
     columns:
       - name: player_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for the player.
         data_tests:
@@ -83,18 +24,34 @@ models:
         data_type: int
         description: >
           Town hall level of the player.
+        data_tests:
+          - not_null
       - name: exp_level
         data_type: int
         description: >
           Experience level of the player.
+        data_tests:
+          - not_null
       - name: trophies
         data_type: int
         description: >
           Current trophies.
+      - name: best_trophies
+        data_type: int
+        description: >
+          Best trophies achieved.
       - name: war_stars
         data_type: int
         description: >
           Total war stars earned.
+      - name: attack_wins
+        data_type: int
+        description: >
+          Attack wins.
+      - name: defense_wins
+        data_type: int
+        description: >
+          Defense wins.
       - name: role
         data_type: varchar
         description: >
@@ -111,24 +68,73 @@ models:
         data_type: int
         description: >
           Troops received.
+      - name: clan_capital_contributions
+        data_type: bigint
+        description: >
+          Clan capital contributions.
       - name: ingest_ts
         data_type: timestamp
-        constraints:
-          - type: not_null
         description: >
           Timestamp when data was ingested.
+        data_tests:
+          - not_null
 
-  - name: clan_war
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__player_attack
+    description: >
+      Player attacks in wars.
+    columns:
+      - name: attack_id
+        data_type: varchar
+        description: >
+          Unique identifier for the attack.
+        data_tests:
+          - not_null
+          - unique
+      - name: clan_war_id
+        data_type: varchar
+        description: >
+          Clan war identifier.
+      - name: attacker_id
+        data_type: varchar
+        description: >
+          Player who made the attack.
+      - name: defender_tag
+        data_type: varchar
+        description: >
+          Player who was attacked.
+      - name: stars
+        data_type: int
+        description: >
+          Stars earned in attack.
+      - name: destruction_percentage
+        data_type: float
+        description: >
+          Destruction percentage.
+      - name: attack_number
+        data_type: int
+        description: >
+          Attack number.
+      - name: map_position
+        data_type: int
+        description: >
+          Map position of attacker.
+      - name: duration
+        data_type: int
+        description: >
+          Attack duration in seconds.
+      - name: ingest_ts
+        data_type: timestamp
+        description: >
+          Timestamp when data was ingested.
+        data_tests:
+          - not_null
+
+  - name: stg_coc_info__clan_war
     description: >
       Combined war data from current war and war log.
     columns:
       - name: clan_war_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for the clan war.
         data_tests:
@@ -146,10 +152,30 @@ models:
         data_type: varchar
         description: >
           Opponent clan tag.
+      - name: opponent_clan_name
+        data_type: varchar
+        description: >
+          Opponent clan name.
       - name: team_size
         data_type: int
         description: >
           Number of players in war.
+      - name: attacks_per_member
+        data_type: int
+        description: >
+          Attacks per member.
+      - name: battle_modifier
+        data_type: varchar
+        description: >
+          Battle modifier.
+      - name: badge_urls
+        data_type: variant
+        description: >
+          Badge URLs.
+      - name: clan_level
+        data_type: int
+        description: >
+          Clan level.
       - name: attacks
         data_type: int
         description: >
@@ -170,24 +196,24 @@ models:
         data_type: float
         description: >
           Total destruction percentage.
+      - name: exp_earned
+        data_type: int
+        description: >
+          Experience earned.
       - name: ingest_ts
         data_type: timestamp
-        constraints:
-          - type: not_null
         description: >
           Timestamp when data was ingested.
+        data_tests:
+          - not_null
 
-  - name: war_state
-    config:
-      contract:
-        enforced: true
+  # Modelos de tablas de referencia (pueden tener contracts si quieres)
+  - name: stg_coc_info__war_state
     description: >
       Reference table for war states.
     columns:
       - name: war_state_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for war state.
         data_tests:
@@ -195,69 +221,17 @@ models:
           - unique
       - name: war_state
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           War state description.
-
-  - name: player_attack
-    config:
-      contract:
-        enforced: true
-    description: >
-      Player attacks in wars.
-    columns:
-      - name: attack_id
-        data_type: varchar
-        constraints:
-          - type: not_null
-        description: >
-          Unique identifier for the attack.
         data_tests:
           - not_null
-          - unique
-      - name: attacker_id
-        data_type: varchar
-        description: >
-          Player who made the attack.
-      - name: defender_tag
-        data_type: varchar
-        description: >
-          Player who was attacked.
-      - name: stars
-        data_type: int
-        description: >
-          Stars earned in attack.
-      - name: destruction_percentage
-        data_type: float
-        description: >
-          Destruction percentage.
-      - name: map_position
-        data_type: int
-        description: >
-          Map position of attacker.
-      - name: duration
-        data_type: int
-        description: >
-          Attack duration in seconds.
-      - name: ingest_ts
-        data_type: timestamp
-        constraints:
-          - type: not_null
-        description: >
-          Timestamp when data was ingested.
 
-  - name: heroes
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__heroes
     description: >
       Reference table for all heroes.
     columns:
       - name: hero_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for the hero.
         data_tests:
@@ -265,26 +239,21 @@ models:
           - unique
       - name: name
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Hero name.
+        data_tests:
+          - not_null
       - name: village
         data_type: varchar
         description: >
           Village type (home/builderBase).
 
-  - name: troops
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__troops
     description: >
       Reference table for all troops.
     columns:
       - name: troop_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for the troop.
         data_tests:
@@ -292,26 +261,21 @@ models:
           - unique
       - name: name
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Troop name.
+        data_tests:
+          - not_null
       - name: village
         data_type: varchar
         description: >
           Village type (home/builderBase).
 
-  - name: spells
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__spells
     description: >
       Reference table for all spells.
     columns:
       - name: spell_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for the spell.
         data_tests:
@@ -319,26 +283,21 @@ models:
           - unique
       - name: name
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Spell name.
+        data_tests:
+          - not_null
       - name: village
         data_type: varchar
         description: >
           Village type (home/builderBase).
 
-  - name: achievements
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__achievements
     description: >
       Reference table for all achievements.
     columns:
       - name: achievement_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for the achievement.
         data_tests:
@@ -346,10 +305,10 @@ models:
           - unique
       - name: name
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Achievement name.
+        data_tests:
+          - not_null
       - name: target
         data_type: int
         description: >
@@ -358,22 +317,21 @@ models:
         data_type: text
         description: >
           Achievement description.
+      - name: completion_info
+        data_type: text
+        description: >
+          Completion information.
       - name: village
         data_type: varchar
         description: >
           Village type.
 
-  - name: hero_equipment
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__hero_equipment
     description: >
       Reference table for hero equipment.
     columns:
       - name: hero_equipment_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for the hero equipment.
         data_tests:
@@ -381,26 +339,22 @@ models:
           - unique
       - name: name
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Equipment name.
+        data_tests:
+          - not_null
       - name: village
         data_type: varchar
         description: >
           Village type.
 
-  - name: player_troop
-    config:
-      contract:
-        enforced: true
+  # Modelos de relaciones (sin contracts)
+  - name: stg_coc_info__player_troop
     description: >
       Relationship between players and their troops with levels.
     columns:
       - name: player_troop_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for player-troop relationship.
         data_tests:
@@ -427,17 +381,12 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: player_hero
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__player_hero
     description: >
       Relationship between players and their heroes with levels.
     columns:
       - name: player_hero_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for player-hero relationship.
         data_tests:
@@ -464,17 +413,12 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: player_spell
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__player_spell
     description: >
       Relationship between players and their spells with levels.
     columns:
       - name: player_spell_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for player-spell relationship.
         data_tests:
@@ -501,17 +445,12 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: player_achievement
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__player_achievement
     description: >
       Relationship between players and their achievements with progress.
     columns:
       - name: player_achievement_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for player-achievement relationship.
         data_tests:
@@ -538,17 +477,12 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: player_hero_equipment
-    config:
-      contract:
-        enforced: true
+  - name: stg_coc_info__player_hero_equipment
     description: >
       Relationship between player heroes and their equipment with levels.
     columns:
       - name: player_hero_equipment_id
         data_type: varchar
-        constraints:
-          - type: not_null
         description: >
           Unique identifier for player-hero-equipment relationship.
         data_tests:
