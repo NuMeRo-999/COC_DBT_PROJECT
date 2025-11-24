@@ -5,7 +5,6 @@
 
 WITH player_heroes AS (
     SELECT
-        player_id,
         ingest_ts,
         hero.value:name::VARCHAR AS hero_name,
         hero.value:village::VARCHAR AS village

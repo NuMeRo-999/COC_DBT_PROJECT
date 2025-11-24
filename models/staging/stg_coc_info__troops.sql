@@ -1,11 +1,6 @@
-{{ config(
-    materialized='table',
-    tags=['silver','troops']
-) }}
-
 WITH player_troops AS (
     SELECT
-        player_id,
+        player_tag,
         ingest_ts,
         troop.value:name::VARCHAR AS troop_name,
         troop.value:village::VARCHAR AS village

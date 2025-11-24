@@ -40,11 +40,13 @@ models:
     # Applies to all files under models/staging/
     staging:
       +materialized: view
-      # +schema: coc_raw_info
+      +schema: coc_silver_info
+      +database: COC_DEV_SILVER_DB
     # Applies to all files under models/marts/      
     marts:
       +materialized: table
-      # +schema: silver_marts
+      +schema: coc_gold_info
+      +database: COC_DEV_GOLD_DB
 
 flags:
   require_generic_test_arguments_property: true

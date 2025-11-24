@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: stg_coc_raw_info__clan
+  - name: clan
     config:
       contract:
         enforced: true
@@ -56,7 +56,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__player
+  - name: player
     config:
       contract:
         enforced: true
@@ -118,7 +118,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__clan_war
+  - name: clan_war
     config:
       contract:
         enforced: true
@@ -177,7 +177,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__war_state
+  - name: war_state
     config:
       contract:
         enforced: true
@@ -200,7 +200,7 @@ models:
         description: >
           War state description.
 
-  - name: stg_coc_raw_info__player_attack
+  - name: player_attack
     config:
       contract:
         enforced: true
@@ -247,7 +247,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__heroes
+  - name: heroes
     config:
       contract:
         enforced: true
@@ -274,7 +274,7 @@ models:
         description: >
           Village type (home/builderBase).
 
-  - name: stg_coc_raw_info__troops
+  - name: troops
     config:
       contract:
         enforced: true
@@ -301,7 +301,7 @@ models:
         description: >
           Village type (home/builderBase).
 
-  - name: stg_coc_raw_info__spells
+  - name: spells
     config:
       contract:
         enforced: true
@@ -328,7 +328,7 @@ models:
         description: >
           Village type (home/builderBase).
 
-  - name: stg_coc_raw_info__achievements
+  - name: achievements
     config:
       contract:
         enforced: true
@@ -363,7 +363,7 @@ models:
         description: >
           Village type.
 
-  - name: stg_coc_raw_info__hero_equipment
+  - name: hero_equipment
     config:
       contract:
         enforced: true
@@ -390,7 +390,7 @@ models:
         description: >
           Village type.
 
-  - name: stg_coc_raw_info__player_troop
+  - name: player_troop
     config:
       contract:
         enforced: true
@@ -427,7 +427,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__player_hero
+  - name: player_hero
     config:
       contract:
         enforced: true
@@ -464,7 +464,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__player_spell
+  - name: player_spell
     config:
       contract:
         enforced: true
@@ -501,7 +501,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__player_achievement
+  - name: player_achievement
     config:
       contract:
         enforced: true
@@ -538,7 +538,7 @@ models:
         description: >
           Timestamp when data was ingested.
 
-  - name: stg_coc_raw_info__player_hero_equipment
+  - name: player_hero_equipment
     config:
       contract:
         enforced: true

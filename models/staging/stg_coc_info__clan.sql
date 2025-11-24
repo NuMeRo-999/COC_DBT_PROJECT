@@ -5,7 +5,7 @@
 
 WITH clan_data AS (
     SELECT
-        raw:tag::VARCHAR AS clan_id,
+        MD5(raw:tag::VARCHAR) AS clan_id,
         raw:name::VARCHAR AS name,
         raw:type::VARCHAR AS type,
         raw:description::VARCHAR AS description,
@@ -28,7 +28,7 @@ WITH clan_data AS (
         raw:requiredBuilderBaseTrophies::INT AS required_builder_base_trophies,
         raw:requiredTownhallLevel::INT AS required_townhall_level,
         raw:chatLanguage:name::VARCHAR AS chat_language,
-        ingest_ts
+        CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
     FROM {{ source('coc_raw_info', 'clan_raw') }}
     WHERE raw IS NOT NULL
 )

@@ -1,11 +1,13 @@
+/*
 {{ config(
-    materialized='table',
-    tags=['silver','player_relationships']
+    materialized='incremental',
 ) }}
+*/
 
 WITH player_achievements AS (
     SELECT
-        p.player_id,
+        MD5(p.player_tag) AS player_id,
+        p.player_tag,
         p.ingest_ts,
         achievement.value:name::VARCHAR AS achievement_name,
         achievement.value:value::INT AS value,
@@ -18,14 +20,14 @@ WITH player_achievements AS (
 
 joined_achievements AS (
     SELECT
-        MD5(pa.player_id || '-' || a.achievement_id) AS player_achievement_id,
+        MD5(pa.player_tag || '-' || a.achievement_id) AS player_achievement_id,
         pa.player_id,
         a.achievement_id,
         pa.value,
         pa.stars,
         pa.ingest_ts
     FROM player_achievements pa
-    INNER JOIN {{ ref('stg_coc_raw_info__achievements') }} a
+    INNER JOIN {{ ref('stg_coc_info__achievements') }} a
         ON pa.achievement_name = a.name
         AND COALESCE(pa.village, 'home') = a.village
 )
@@ -36,5 +38,5 @@ SELECT
     achievement_id,
     value,
     stars,
-    ingest_ts
+    CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
 FROM joined_achievements

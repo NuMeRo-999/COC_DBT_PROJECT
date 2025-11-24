@@ -1,11 +1,12 @@
+/*
 {{ config(
-    materialized='table',
-    tags=['silver','player_relationships']
+    materialized='incremental',
 ) }}
+*/
 
 WITH player_troops AS (
     SELECT
-        p.player_id,
+        p.player_tag,
         p.ingest_ts,
         troop.value:name::VARCHAR AS troop_name,
         troop.value:level::INT AS level,
@@ -18,23 +19,23 @@ WITH player_troops AS (
 
 joined_troops AS (
     SELECT
-        MD5(pt.player_id || '-' || t.troop_id) AS player_troop_id,
-        pt.player_id,
+        MD5(pt.player_tag || '-' || t.troop_id) AS player_troop_id,
+        pt.player_tag,
         t.troop_id,
         pt.level,
         pt.max_level,
         pt.ingest_ts
     FROM player_troops pt
-    INNER JOIN {{ ref('stg_coc_raw_info__troops') }} t
+    INNER JOIN {{ ref('stg_coc_info__troops') }} t
         ON pt.troop_name = t.name
         AND COALESCE(pt.village, 'home') = t.village
 )
 
 SELECT
     player_troop_id,
-    player_id,
+    player_tag,
     troop_id,
     level,
     max_level,
-    ingest_ts
+    CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
 FROM joined_troops

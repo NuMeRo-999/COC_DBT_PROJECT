@@ -1,6 +1,5 @@
 {{ config(
-    materialized='table',
-    tags=['silver','war']
+    materialized='incremental',
 ) }}
 
 WITH current_war AS (
@@ -17,11 +16,11 @@ WITH current_war AS (
         raw:clan:clanLevel::INT AS clan_level,
         raw:clan:attacks::INT AS attacks,
         raw:clan:stars::INT AS stars,
-        TRY_TO_TIMESTAMP(raw:startTime) AS start_time,
-        TRY_TO_TIMESTAMP(raw:endTime) AS end_time,
+        TRY_TO_TIMESTAMP(raw:startTime::VARCHAR) AS start_time,
+        TRY_TO_TIMESTAMP(raw:endTime::VARCHAR) AS end_time,
         raw:clan:destructionPercentage::FLOAT AS destruction_percentage,
         COALESCE(raw:clan:expEarned::INT, 0) AS exp_earned,
-        ingest_ts
+        CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
     FROM {{ source('coc_raw_info', 'currentwar_raw') }}
     WHERE raw IS NOT NULL
 ),
@@ -45,8 +44,8 @@ war_log AS (
         raw:clan:clanLevel::INT AS clan_level,
         raw:clan:attacks::INT AS attacks,
         raw:clan:stars::INT AS stars,
-        TRY_TO_TIMESTAMP(raw:endTime) - INTERVAL '24 hours' AS start_time,
-        TRY_TO_TIMESTAMP(raw:endTime) AS end_time,
+        DATEADD(hour, -24, TRY_TO_TIMESTAMP(raw:endTime::VARCHAR)) AS start_time,
+        TRY_TO_TIMESTAMP(raw:endTime::VARCHAR) AS end_time,
         raw:clan:destructionPercentage::FLOAT AS destruction_percentage,
         COALESCE(raw:clan:expEarned::INT, 0) AS exp_earned,
         ingest_ts

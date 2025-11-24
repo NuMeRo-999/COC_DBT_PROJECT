@@ -5,7 +5,7 @@
 
 WITH player_hero_equipment_data AS (
     SELECT
-        p.player_id,
+        p.player_tag,
         p.ingest_ts,
         equipment.value:name::VARCHAR AS equipment_name,
         equipment.value:level::INT AS level,
@@ -18,21 +18,20 @@ WITH player_hero_equipment_data AS (
 
 final AS (
     SELECT
-        MD5(player_id || '-' || equipment_name) AS player_hero_equipment_id,
-        MD5(player_id || '-' || equipment_name || '-' || COALESCE(village, 'home')) AS hero_equipment_id,
-        player_id,
+        MD5(player_tag || '-' || equipment_name) AS player_hero_equipment_id,
+        MD5(player_tag || '-' || equipment_name || '-' || COALESCE(village, 'home')) AS hero_equipment_id,
+        player_tag,
         equipment_name,
         level,
         max_level,
         village,
-        ingest_ts
+        CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
     FROM player_hero_equipment_data
 )
 
 SELECT
     player_hero_equipment_id,
     hero_equipment_id,
-    player_id,
     equipment_name,
     level,
     max_level,

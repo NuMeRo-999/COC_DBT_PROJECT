@@ -1,11 +1,6 @@
-{{ config(
-    materialized='table',
-    tags=['silver','achievements']
-) }}
 
 WITH player_achievements AS (
     SELECT
-        player_id,
         ingest_ts,
         achievement.value:name::VARCHAR AS achievement_name,
         achievement.value:target::INT AS target,

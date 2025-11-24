@@ -1,6 +1,5 @@
 {{ config(
-    materialized='table',
-    tags=['silver','attack']
+    materialized='incremental',
 ) }}
 
 WITH attack_data AS (
@@ -11,8 +10,7 @@ WITH attack_data AS (
             COALESCE(raw:attackNumber::VARCHAR, '1') || '-' ||
             COALESCE(raw:mapPosition::VARCHAR, '0')
         ) AS attack_id,
-        -- We'll need to derive clan_war_id from context or leave NULL for now
-        NULL AS clan_war_id,
+        clan_war_id,
         raw:attackerTag::VARCHAR AS attacker_id,
         raw:defenderTag::VARCHAR AS defender_tag,
         raw:stars::INT AS stars,
@@ -20,8 +18,9 @@ WITH attack_data AS (
         COALESCE(raw:attackNumber::INT, 1) AS attack_number,
         COALESCE(raw:mapPosition::INT, 0) AS map_position,
         raw:duration::INT AS duration,
-        ingest_ts
-    FROM {{ source('coc_raw_info', 'attack_raw') }}
+        CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
+    FROM {{ source('coc_raw_info', 'attack_raw') }} a
+    INNER JOIN {{ ref('stg_coc_info__clan_war') }} cw
     WHERE raw IS NOT NULL
 )
 

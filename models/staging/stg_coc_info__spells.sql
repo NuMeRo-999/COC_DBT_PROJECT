@@ -1,11 +1,7 @@
-{{ config(
-    materialized='table',
-    tags=['silver','spells']
-) }}
 
 WITH player_spells AS (
     SELECT
-        player_id,
+        player_tag,
         ingest_ts,
         spell.value:name::VARCHAR AS spell_name,
         spell.value:village::VARCHAR AS village
