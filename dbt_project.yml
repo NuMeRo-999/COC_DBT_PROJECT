@@ -50,3 +50,7 @@ models:
 
 flags:
   require_generic_test_arguments_property: true
+
+seeds:
+  +database: "COC_DEV_BRONZE_DB"
+  +schema: "COC_RAW_INFO"

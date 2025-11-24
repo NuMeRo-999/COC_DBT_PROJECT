@@ -1,7 +1,6 @@
 version: 2
 
 models:
-  # Modelos incrementales (sin contracts)
   - name: stg_coc_info__player
     description: >
       Staging table for player data extracted from raw JSON.
@@ -207,7 +206,6 @@ models:
         data_tests:
           - not_null
 
-  # Modelos de tablas de referencia (pueden tener contracts si quieres)
   - name: stg_coc_info__war_state
     description: >
       Reference table for war states.
@@ -348,7 +346,6 @@ models:
         description: >
           Village type.
 
-  # Modelos de relaciones (sin contracts)
   - name: stg_coc_info__player_troop
     description: >
       Relationship between players and their troops with levels.

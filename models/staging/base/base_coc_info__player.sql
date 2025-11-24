@@ -1,7 +1,3 @@
-{{ config(
-    materialized='incremental'
-) }}
-
 SELECT
     MD5(raw:tag::VARCHAR) AS player_id,
     MD5(raw:clan:tag::VARCHAR) AS clan_id,

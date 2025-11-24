@@ -28,7 +28,7 @@ WITH clan_data AS (
         raw:requiredBuilderBaseTrophies::INT AS required_builder_base_trophies,
         raw:requiredTownhallLevel::INT AS required_townhall_level,
         raw:chatLanguage:name::VARCHAR AS chat_language,
-        CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
+        ingest_ts
     FROM {{ source('coc_raw_info', 'clan_raw') }}
     WHERE raw IS NOT NULL
 )
@@ -56,5 +56,5 @@ SELECT
     required_builder_base_trophies,
     required_townhall_level,
     chat_language,
-    ingest_ts
+    CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
 FROM clan_data
