@@ -129,6 +129,11 @@ def generate_map_positions(players):
 
     return pos_map
 
+def random_defender_tag():
+    """Genera un defenderTag con formato # + 9 chars (A-Z0-9)."""
+    chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    return "#" + "".join(random.choice(chars) for _ in range(9))
+
 def generate_attacks(players):
     """
     players = [{ player_tag, name }]
@@ -149,9 +154,9 @@ def generate_attacks(players):
         fixed_map_position = map_positions[attacker_tag]
 
         for attack_number in range(1, num_attacks + 1):
-            defender_tag = random.choice(player_tags)
+            defender_tag = random_defender_tag()
             while defender_tag == attacker_tag:  # evitar auto-ataque
-                defender_tag = random.choice(player_tags)
+                defender_tag = random_defender_tag()
 
             stars, destruction = generate_stars_and_destruction()
 
