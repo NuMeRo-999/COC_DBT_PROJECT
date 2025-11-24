@@ -84,5 +84,5 @@ SELECT
     end_time,
     destruction_percentage,
     exp_earned,
-    CONVERT_TIMEZONE('UTC', current_timestamp()) AS ingest_ts
+    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS ingest_ts
 FROM combined_wars

@@ -68,5 +68,5 @@ SELECT
     map_position,
     duration,
     clan_id,
-    CONVERT_TIMEZONE('UTC', current_timestamp()) AS ingest_ts
+    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS ingest_ts
 FROM final_attacks

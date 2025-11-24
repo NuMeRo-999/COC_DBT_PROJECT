@@ -56,5 +56,5 @@ SELECT
     required_builder_base_trophies,
     required_townhall_level,
     chat_language,
-    CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
+    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS ingest_ts
 FROM clan_data
