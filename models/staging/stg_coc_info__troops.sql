@@ -1,32 +1,14 @@
-WITH player_troops AS (
-    SELECT
-        player_tag,
-        ingest_ts,
-        troop.value:name::VARCHAR AS troop_name,
-        troop.value:village::VARCHAR AS village
-    FROM {{ source('coc_raw_info', 'player_raw') }},
-    LATERAL FLATTEN(input => raw:troops) AS troop
-    WHERE raw:troops IS NOT NULL
-),
-
-unique_troops AS (
-    SELECT DISTINCT
-        troop_name AS name,
-        COALESCE(village, 'home') AS village
-    FROM player_troops
-    WHERE troop_name IS NOT NULL
-),
-
-troops_with_id AS (
-    SELECT
-        MD5(name || '-' || village) AS troop_id,
-        name,
-        village
-    FROM unique_troops
-)
+{{ config(
+    tags=['silver','player_relationships']
+) }}
 
 SELECT
-    troop_id,
-    name,
-    village
-FROM troops_with_id
+    MD5(player_id || '-' || troop.value:name::VARCHAR || '-' || COALESCE(troop.value:village::VARCHAR, 'home')) AS player_troop_id,
+    player_id,
+    MD5(troop.value:name::VARCHAR || '-' || COALESCE(troop.value:village::VARCHAR, 'home')) AS troop_id,
+    troop.value:level::INT AS level,
+    troop.value:maxLevel::INT AS max_level,
+    ingest_ts
+FROM {{ ref('base_coc_info__player') }},
+LATERAL FLATTEN(input => raw_troops) AS troop
+WHERE raw_troops IS NOT NULL
