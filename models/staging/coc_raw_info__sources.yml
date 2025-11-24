@@ -1,0 +1,66 @@
+version: 2
+
+sources:
+  - name: coc_raw_info
+    database: COC_DEV_BRONZE_DB
+    schema: COC_RAW_INFO
+    tables:
+      - name: clan_raw
+        columns:
+          - name: clan_tag
+            tests:
+              - not_null
+          - name: raw
+            tests:
+              - not_null
+          - name: ingest_ts
+            tests:
+              - not_null          
+
+      - name: warlog_raw
+        columns:
+            - name: clan_tag
+              tests:
+                - not_null
+            - name: raw
+              tests:
+                - not_null
+            - name: ingest_ts
+              tests:
+                - not_null
+
+      - name: currentwar_raw
+        columns:
+            - name: clan_tag
+              tests:
+                - not_null
+            - name: raw
+              tests:
+                - not_null
+            - name: ingest_ts
+              tests:
+                - not_null     
+
+      - name: player_raw
+        columns:
+          - name: player_tag
+            tests:
+              - not_null
+          - name: raw
+            tests:
+              - not_null
+          - name: ingest_ts
+            tests:
+              - not_null     
+
+      - name: attack_raw
+        columns:
+          - name: player_tag
+            tests:
+              - not_null
+          - name: raw
+            tests:
+              - not_null
+          - name: ingest_ts
+            tests:
+              - not_null     
