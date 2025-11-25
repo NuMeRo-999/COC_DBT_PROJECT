@@ -1,34 +1,34 @@
-/*
-{{ config(
-    materialized='incremental',
-) }}
-*/
+{{
+    config(
+        tags=['silver','player_relationships']
+    )
+}}
 
-WITH player_heroes AS (
+WITH player_hero_data AS (
     SELECT
-        p.player_tag,
-        p.ingest_ts,
-        hero.value:name::VARCHAR AS hero_name,
+        player_id,
+        MD5(hero.value:name::VARCHAR || '-' || COALESCE(hero.value:village::VARCHAR, 'home')) AS hero_id,
         hero.value:level::INT AS level,
         hero.value:maxLevel::INT AS max_level,
-        hero.value:village::VARCHAR AS village
-    FROM {{ source('coc_raw_info', 'player_raw') }} p,
-    LATERAL FLATTEN(input => p.raw:heroes) AS hero
-    WHERE p.raw:heroes IS NOT NULL
+        ingest_ts
+    FROM {{ ref('base_coc_info__player') }},
+    LATERAL FLATTEN(input => raw_heroes) AS hero
+    WHERE raw_heroes IS NOT NULL
 ),
 
-joined_heroes AS (
+unique_player_heroes AS (
     SELECT
-        MD5(ph.player_tag || '-' || h.hero_id) AS player_hero_id,
-        MD5(ph.player_tag) AS player_id,
-        h.hero_id,
-        ph.level,
-        ph.max_level,
-        ph.ingest_ts
-    FROM player_heroes ph
-    INNER JOIN {{ ref('stg_coc_info__heroes') }} h
-        ON ph.hero_name = h.name
-        AND COALESCE(ph.village, 'home') = h.village
+        MD5(player_id || '-' || hero_id) AS player_hero_id,
+        player_id,
+        hero_id,
+        level,
+        max_level,
+        ingest_ts
+    FROM player_hero_data
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY player_id, hero_id
+        ORDER BY ingest_ts DESC
+    ) = 1
 )
 
 SELECT
@@ -37,5 +37,5 @@ SELECT
     hero_id,
     level,
     max_level,
-    CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
-FROM joined_heroes
+    ingest_ts
+FROM unique_player_heroes

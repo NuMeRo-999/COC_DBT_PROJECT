@@ -1,0 +1,25 @@
+SELECT
+    MD5(raw:tag::VARCHAR) AS player_id,
+    MD5(raw:clan:tag::VARCHAR) AS clan_id,
+    raw:tag::VARCHAR AS player_tag,
+    raw:name::VARCHAR AS name,
+    raw:townHallLevel::INT AS town_hall_level,
+    raw:expLevel::INT AS exp_level,
+    raw:trophies::INT AS trophies,
+    raw:bestTrophies::INT AS best_trophies,
+    raw:warStars::INT AS war_stars,
+    raw:attackWins::INT AS attack_wins,
+    raw:defenseWins::INT AS defense_wins,
+    raw:role::VARCHAR AS role,
+    raw:warPreference::VARCHAR AS war_preference,
+    raw:donations::INT AS donations,
+    raw:donationsReceived::INT AS donations_received,
+    COALESCE(raw:clanCapitalContributions::BIGINT, 0) AS clan_capital_contributions,
+    raw:achievements AS raw_achievements,
+    raw:heroes AS raw_heroes,
+    raw:heroEquipment AS raw_hero_equipment,
+    raw:troops AS raw_troops,
+    raw:spells AS raw_spells,
+    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS ingest_ts
+FROM {{ source('coc_raw_info', 'player_raw') }}
+WHERE raw IS NOT NULL

@@ -1,4 +1,3 @@
-
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
@@ -18,8 +17,6 @@ test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
-
-target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
@@ -35,18 +32,27 @@ clean-targets:         # directories to be removed by `dbt clean`
 # continue to be built as views. These settings can be overridden in the individual model files
 # using the `{{ config(...) }}` macro.
 
+# Agregar estas configuraciones
 models:
   coc_dbt_project:
-    # Applies to all files under models/staging/
     staging:
       +materialized: view
       +schema: coc_silver_info
       +database: COC_DEV_SILVER_DB
-    # Applies to all files under models/marts/      
+    
     marts:
       +materialized: table
       +schema: coc_gold_info
       +database: COC_DEV_GOLD_DB
+      +tags: gold
+    
+snapshots:
+  +target_schema: coc_snapshots
+  +database: COC_DEV_SILVER_DB
 
 flags:
   require_generic_test_arguments_property: true
+
+seeds:
+  +database: "COC_DEV_BRONZE_DB"
+  +schema: "COC_RAW_INFO"

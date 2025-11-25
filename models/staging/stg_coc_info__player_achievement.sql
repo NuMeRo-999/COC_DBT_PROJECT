@@ -1,35 +1,34 @@
-/*
-{{ config(
-    materialized='incremental',
-) }}
-*/
+{{
+    config(
+        tags=['silver','player_relationships']
+    )
+}}
 
-WITH player_achievements AS (
+WITH player_achievement_data AS (
     SELECT
-        MD5(p.player_tag) AS player_id,
-        p.player_tag,
-        p.ingest_ts,
-        achievement.value:name::VARCHAR AS achievement_name,
+        player_id,
+        MD5(achievement.value:name::VARCHAR || '-' || COALESCE(achievement.value:village::VARCHAR, 'home')) AS achievement_id,
         achievement.value:value::INT AS value,
         achievement.value:stars::INT AS stars,
-        achievement.value:village::VARCHAR AS village
-    FROM {{ source('coc_raw_info', 'player_raw') }} p,
-    LATERAL FLATTEN(input => p.raw:achievements) AS achievement
-    WHERE p.raw:achievements IS NOT NULL
+        ingest_ts
+    FROM {{ ref('base_coc_info__player') }},
+    LATERAL FLATTEN(input => raw_achievements) AS achievement
+    WHERE raw_achievements IS NOT NULL
 ),
 
-joined_achievements AS (
+unique_player_achievements AS (
     SELECT
-        MD5(pa.player_tag || '-' || a.achievement_id) AS player_achievement_id,
-        pa.player_id,
-        a.achievement_id,
-        pa.value,
-        pa.stars,
-        pa.ingest_ts
-    FROM player_achievements pa
-    INNER JOIN {{ ref('stg_coc_info__achievements') }} a
-        ON pa.achievement_name = a.name
-        AND COALESCE(pa.village, 'home') = a.village
+        MD5(player_id || '-' || achievement_id) AS player_achievement_id,
+        player_id,
+        achievement_id,
+        value,
+        stars,
+        ingest_ts
+    FROM player_achievement_data
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY player_id, achievement_id
+        ORDER BY ingest_ts DESC
+    ) = 1
 )
 
 SELECT
@@ -38,5 +37,5 @@ SELECT
     achievement_id,
     value,
     stars,
-    CONVERT_TIMEZONE('UTC', current_date()) AS ingest_ts
-FROM joined_achievements
+    ingest_ts
+FROM unique_player_achievements
