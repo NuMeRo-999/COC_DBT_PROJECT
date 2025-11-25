@@ -22,3 +22,8 @@ SELECT
     clan_capital_contributions,
     ingest_ts
 FROM {{ ref('base_coc_info__player') }}
+
+{% if is_incremental() %}
+        WHERE ingest_ts > (SELECT MAX(ingest_ts) FROM {{ this }} )
+    AND ingest_ts > (SELECT MAX(ingest_ts) FROM {{ this }})
+{% endif %}

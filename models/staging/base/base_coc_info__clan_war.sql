@@ -1,14 +1,16 @@
-{{ config(
-    materialized='incremental',
-    on_schema_change='sync_all_columns',
-    tags=['silver','base','clan_war']
-) }}
+{{
+    config(
+        materialized='incremental',
+        on_schema_change='sync_all_columns',
+        tags=['silver','base','clan_war']
+    )
+}}
 
 WITH current_war AS (
     SELECT
         MD5(clan_tag || '-' || COALESCE(raw:startTime::VARCHAR, 'current')) AS clan_war_id,
         clan_tag AS clan_id,
-        raw:state::VARCHAR AS state,
+        MD5(raw:state::VARCHAR) AS state_id,
         raw:opponent:tag::VARCHAR AS opponent_clan_tag,
         raw:opponent:name::VARCHAR AS opponent_clan_name,
         raw:teamSize::INT AS team_size,
@@ -25,6 +27,9 @@ WITH current_war AS (
         ingest_ts
     FROM {{ source('coc_raw_info', 'currentwar_raw') }}
     WHERE raw IS NOT NULL
+    {% if is_incremental() %}
+        AND ingest_ts > (SELECT MAX(ingest_ts) FROM {{ this }})
+    {% endif %}
 ),
 
 war_log AS (
@@ -32,13 +37,13 @@ war_log AS (
         MD5(clan_tag || '-' || raw:endTime::VARCHAR) AS clan_war_id,
         clan_tag AS clan_id,
         CASE 
-            WHEN raw:result::VARCHAR = 'win' THEN 'win'
-            WHEN raw:result::VARCHAR = 'lose' THEN 'lose'
-            WHEN raw:result::VARCHAR = 'tie' THEN 'draw'
-            ELSE 'unknown'
-        END AS state,
-        raw:opponent:tag::VARCHAR AS opponent_clan_tag,
-        raw:opponent:name::VARCHAR AS opponent_clan_name,
+            WHEN raw:result::VARCHAR = 'win' THEN MD5('win')
+            WHEN raw:result::VARCHAR = 'lose' THEN MD5('lose')
+            WHEN raw:result::VARCHAR = 'tie' THEN MD5('tie')
+            ELSE MD5('unknown')
+        END AS state_id,
+        COALESCE(raw:opponent:tag::VARCHAR, 'clan_inexistente') AS opponent_clan_tag,
+        COALESCE(raw:opponent:name::VARCHAR, 'clan_inexistente') AS opponent_clan_name,
         raw:teamSize::INT AS team_size,
         raw:attacksPerMember::INT AS attacks_per_member,
         'none' AS battle_modifier,
@@ -53,13 +58,10 @@ war_log AS (
         ingest_ts
     FROM {{ source('coc_raw_info', 'warlog_raw') }}
     WHERE raw IS NOT NULL
+    {% if is_incremental() %}
+        AND ingest_ts > (SELECT MAX(ingest_ts) FROM {{ this }})
+    {% endif %}
 ),
-
-{% if is_incremental() %}
-
-	  WHERE ingest_ts > (SELECT MAX(ingest_ts) FROM {{ this }} )
-
-{% endif %}
 
 combined_wars AS (
     SELECT * FROM current_war
@@ -69,7 +71,7 @@ combined_wars AS (
 
 SELECT
     clan_war_id,
-    state,
+    state_id,
     clan_id,
     opponent_clan_tag,
     opponent_clan_name,

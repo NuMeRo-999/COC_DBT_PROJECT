@@ -9,6 +9,6 @@ SELECT
     attack_number,
     map_position,
     duration,
-    clan_id,
     ingest_ts
 FROM {{ ref('base_coc_info__player_attack') }}
+ORDER BY attack_id

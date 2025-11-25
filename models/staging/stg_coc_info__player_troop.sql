@@ -2,7 +2,7 @@
     tags=['silver','player_relationships']
 ) }}
 
-SELECT
+SELECT 
     MD5(player_id || '-' || troop.value:name::VARCHAR || '-' || COALESCE(troop.value:village::VARCHAR, 'home')) AS player_troop_id,
     player_id,
     MD5(troop.value:name::VARCHAR || '-' || COALESCE(troop.value:village::VARCHAR, 'home')) AS troop_id,
