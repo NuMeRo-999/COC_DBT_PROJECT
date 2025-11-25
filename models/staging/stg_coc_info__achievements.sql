@@ -1,6 +1,8 @@
-{{ config(
-    tags=['silver','achievements']
-) }}
+{{
+    config(
+        tags=['silver','achievements']
+    )
+}}
 
 WITH player_achievements AS (
     SELECT
@@ -15,7 +17,7 @@ WITH player_achievements AS (
 ),
 
 unique_achievements AS (
-    SELECT DISTINCT
+    SELECT 
         achievement_name AS name,
         target,
         info,
@@ -23,10 +25,14 @@ unique_achievements AS (
         COALESCE(village, 'home') AS village
     FROM player_achievements
     WHERE achievement_name IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY achievement_name, COALESCE(village, 'home')
+        ORDER BY achievement_name
+    ) = 1
 )
 
 SELECT
-    MD5(name || '-' || COALESCE(village, 'home')) AS achievement_id,
+    MD5(name || '-' || village) AS achievement_id,
     name,
     target,
     info,

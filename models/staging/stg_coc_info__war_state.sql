@@ -1,4 +1,4 @@
 SELECT
-    war_state_id,
-    war_state
+    state_id,
+    state
 FROM {{ ref('war_states') }}

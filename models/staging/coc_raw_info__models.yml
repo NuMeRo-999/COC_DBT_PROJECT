@@ -93,10 +93,17 @@ models:
         data_type: varchar
         description: >
           Clan war identifier.
+        data_tests:
+          - not_null
       - name: attacker_id
         data_type: varchar
         description: >
           Player who made the attack.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__player')
+                field: player_id
       - name: defender_tag
         data_type: varchar
         description: >
@@ -139,10 +146,15 @@ models:
         data_tests:
           - not_null
           - unique
-      - name: state
+      - name: state_id
         data_type: varchar
         description: >
           War state (win/lose/draw/inWar/preparation).
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__war_state')
+                field: state_id
       - name: clan_id
         data_type: varchar
         description: >
@@ -210,14 +222,14 @@ models:
     description: >
       Reference table for war states.
     columns:
-      - name: war_state_id
+      - name: state_id
         data_type: varchar
         description: >
           Unique identifier for war state.
         data_tests:
           - not_null
           - unique
-      - name: war_state
+      - name: state
         data_type: varchar
         description: >
           War state description.
@@ -356,15 +368,24 @@ models:
           Unique identifier for player-troop relationship.
         data_tests:
           - not_null
-          - unique
       - name: player_id
         data_type: varchar
         description: >
           Player identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__player')
+                field: player_id
       - name: troop_id
         data_type: varchar
         description: >
           Troop identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__troops')
+                field: troop_id
       - name: level
         data_type: int
         description: >
@@ -388,15 +409,24 @@ models:
           Unique identifier for player-hero relationship.
         data_tests:
           - not_null
-          - unique
       - name: player_id
         data_type: varchar
         description: >
           Player identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__player')
+                field: player_id
       - name: hero_id
         data_type: varchar
         description: >
           Hero identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__heroes')
+                field: hero_id
       - name: level
         data_type: int
         description: >
@@ -420,15 +450,24 @@ models:
           Unique identifier for player-spell relationship.
         data_tests:
           - not_null
-          - unique
       - name: player_id
         data_type: varchar
         description: >
           Player identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__player')
+                field: player_id
       - name: spell_id
         data_type: varchar
         description: >
           Spell identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__spells')
+                field: spell_id
       - name: level
         data_type: int
         description: >
@@ -452,15 +491,24 @@ models:
           Unique identifier for player-achievement relationship.
         data_tests:
           - not_null
-          - unique
       - name: player_id
         data_type: varchar
         description: >
           Player identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__player')
+                field: player_id
       - name: achievement_id
         data_type: varchar
         description: >
           Achievement identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__achievements')
+                field: achievement_id
       - name: value
         data_type: int
         description: >
@@ -484,15 +532,24 @@ models:
           Unique identifier for player-hero-equipment relationship.
         data_tests:
           - not_null
-          - unique
       - name: player_hero_id
         data_type: varchar
         description: >
           Player-hero relationship identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__player_hero')
+                field: player_hero_id
       - name: hero_equipment_id
         data_type: varchar
         description: >
           Hero equipment identifier.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_coc_info__hero_equipment')
+                field: hero_equipment_id
       - name: level
         data_type: int
         description: >

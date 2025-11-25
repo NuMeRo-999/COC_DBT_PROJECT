@@ -1,7 +1,7 @@
 
 SELECT
     clan_war_id,
-    state,
+    state_id,
     clan_id,
     opponent_clan_tag,
     opponent_clan_name,
