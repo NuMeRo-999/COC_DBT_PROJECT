@@ -4,12 +4,13 @@ import json
 from datetime import datetime, timedelta
 import random
 import os
+import hashlib
 from dotenv import load_dotenv
 
 # ----------------------------
 # CARGAR CONFIGURACIÓN DESDE .env
 # ----------------------------
-load_dotenv()  # Carga las variables del archivo .env
+load_dotenv()
 
 # ----------------------------
 # CONFIG (ahora desde variables de entorno)
@@ -48,6 +49,10 @@ def get_coc_api(url):
     response.raise_for_status()
     return response.json()
 
+def generate_md5(text):
+    """Genera hash MD5"""
+    return hashlib.md5(text.encode()).hexdigest()
+
 # ----------------------------
 # Clan Members Functions
 # ----------------------------
@@ -68,18 +73,115 @@ def get_players_with_war_preference(clan_tag):
 
     for m in members:
         player = get_player(m["tag"])
-        if player["warPreference"] == "in":
+        if player.get("warPreference") == "in":
             playerIn.append({
                 "player_tag": player["tag"],
                 "name": player["name"]
             })
-        elif player["warPreference"] == "out":
+        elif player.get("warPreference") == "out":
             playerOut.append({
                 "player_tag": player["tag"], 
                 "name": player["name"]
             })
   
     return {"in": playerIn, "out": playerOut}
+
+# ----------------------------
+# War Data Functions
+# ----------------------------
+def get_current_war_data(clan_tag):
+    """Obtiene datos de la guerra actual"""
+    try:
+        encoded_tag = clan_tag.replace("#", "%23")
+        url = f"{BASE_URL}/clans/{encoded_tag}/currentwar"
+        data = get_coc_api(url)
+        print(f"Current war state: {data.get('state')}")
+        return data
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            print("No current war found")
+            return {'state': 'notInWar'}
+        else:
+            raise e
+    except Exception as e:
+        print(f"Error getting current war: {e}")
+        return {'state': 'notInWar'}
+
+def get_war_log_data(clan_tag):
+    """Obtiene el historial de guerras"""
+    try:
+        encoded_tag = clan_tag.replace("#", "%23")
+        url = f"{BASE_URL}/clans/{encoded_tag}/warlog"
+        data = get_coc_api(url)
+        print(f"War log items found: {len(data.get('items', []))}")
+        return data
+    except Exception as e:
+        print(f"Error getting war log: {e}")
+        return {'items': []}
+
+def generate_war_id(war_data):
+    clan_tag = CLAN_TAG
+    if 'endTime' in war_data:
+        return f"{clan_tag}-{war_data['endTime']}"
+    elif 'startTime' in war_data:
+        return f"{clan_tag}-{war_data['startTime']}"
+    else:
+        return f"{clan_tag}-current"
+
+def calculate_war_start_time(end_time):
+    """Calcula el start_time basado en end_time (las guerras duran 24h)"""
+    try:
+        # Convertir el formato de timestamp de la API
+        end_str = end_time.replace('T', ' ').replace('.000Z', '')
+        end_dt = datetime.strptime(end_str, '%Y%m%d %H%M%S')
+        start_dt = end_dt - timedelta(hours=24)
+        return start_dt.strftime('%Y%m%dT%H%M%S.000Z')
+    except:
+        # Fallback si hay error en el parsing
+        return (datetime.utcnow() - timedelta(hours=24)).strftime('%Y%m%dT%H%M%S.000Z')
+
+def get_war_context(clan_tag):
+    """Obtiene el contexto de guerra actual o más reciente"""
+    # Primero intentar con guerra actual
+    current_war_data = get_current_war_data(clan_tag)
+    
+    if current_war_data.get('state') in ['preparation', 'inWar']:
+        print("Using current war data")
+        return {
+            'war_id': generate_war_id(current_war_data),
+            'start_time': current_war_data.get('startTime'),
+            'end_time': current_war_data.get('endTime'),
+            'is_current': True,
+            'team_size': current_war_data.get('teamSize', 30)
+        }
+    
+    # Si no hay guerra actual, usar la última guerra del log
+    war_log_data = get_war_log_data(clan_tag)
+    war_items = war_log_data.get('items', [])
+    
+    if war_items:
+        latest_war = war_items[0]  # La guerra más reciente
+        print(f"Using latest war from log: {latest_war.get('endTime')}")
+        return {
+            'war_id': generate_war_id(latest_war),
+            'start_time': calculate_war_start_time(latest_war['endTime']),
+            'end_time': latest_war['endTime'],
+            'is_current': False,
+            'team_size': latest_war.get('teamSize', 30)
+        }
+    
+    # Si no hay guerras, crear una simulación
+    print("No war data found, creating simulated war context")
+    simulated_end = datetime.utcnow().strftime('%Y%m%dT%H%M%S.000Z')
+    simulated_start = (datetime.utcnow() - timedelta(hours=24)).strftime('%Y%m%dT%H%M%S.000Z')
+    
+    return {
+        'war_id': generate_md5(f"{CLAN_TAG}_simulated_{simulated_end}"),
+        'start_time': simulated_start,
+        'end_time': simulated_end,
+        'is_current': False,
+        'team_size': 30
+    }
 
 # =====================================================================
 # GENERADOR DE ATAQUES REALISTAS
@@ -116,16 +218,19 @@ def generate_stars_and_destruction():
 
     return stars, destruction
 
-def generate_map_positions(players):
+def generate_map_positions(players, team_size=30):
     """
-    Asigna una posición de mapa única por jugador (1–30).
+    Asigna una posición de mapa única por jugador (1–team_size).
     """
-    available_positions = list(range(1, len(players) + 1))
+    available_positions = list(range(1, team_size + 1))
     random.shuffle(available_positions)
 
     pos_map = {}
     for i, p in enumerate(players):
-        pos_map[p["player_tag"]] = available_positions[i]
+        if i < len(available_positions):
+            pos_map[p["player_tag"]] = available_positions[i]
+        else:
+            pos_map[p["player_tag"]] = i + 1
 
     return pos_map
 
@@ -134,15 +239,17 @@ def random_defender_tag():
     chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     return "#" + "".join(random.choice(chars) for _ in range(9))
 
-def generate_attacks(players):
+def generate_attacks(players, war_context=None):
     """
     players = [{ player_tag, name }]
+    war_context = { war_id, start_time, end_time, is_current, team_size }
     """
     player_tags = [p["player_tag"] for p in players]
+    
+    # Usar team_size del war_context o default 30
+    team_size = war_context.get('team_size', 30) if war_context else 30
     attack_counts = assign_attack_count(len(player_tags))
-
-    # POSICIONES ÚNICAS Y FIJAS POR JUGADOR
-    map_positions = generate_map_positions(players)
+    map_positions = generate_map_positions(players, team_size)
 
     attacks = []
 
@@ -166,10 +273,18 @@ def generate_attacks(players):
                 "stars": stars,
                 "destructionPercentage": destruction,
                 "attackNumber": attack_number,
-                "mapPosition": fixed_map_position,  # ← POSICIÓN FIJA
+                "mapPosition": fixed_map_position,
                 "duration": random.randint(90, 180),
                 "ingest_ts": datetime.utcnow().isoformat() + "Z"
             }
+
+            # AÑADIR INFORMACIÓN DE GUERRA SI ESTÁ DISPONIBLE
+            if war_context:
+                attack["warId"] = war_context["war_id"]
+                attack["warStartTime"] = war_context["start_time"]
+                attack["warEndTime"] = war_context["end_time"]
+                attack["isCurrentWar"] = war_context["is_current"]
+                attack["teamSize"] = war_context["team_size"]
 
             attacks.append(attack)
 
@@ -180,28 +295,32 @@ def generate_and_ingest_attacks():
     cs = conn.cursor()
 
     try:
-        # Get players with proper structure
+        # 1. Obtener contexto de guerra
+        war_context = get_war_context(CLAN_TAG)
+        
+        # 2. Get players
         members = get_players_with_war_preference(CLAN_TAG)
         players = []
-
-        if len(members["in"]) >= 30:
-            # limitar el array a máximo 30 jugadores
-            players = members["in"]
-        elif len(members["in"]) < 30:
-            # agregar jugadores con preferencia de guerra out
-            players = members["in"] + members["out"]
         
-        # limito el array a 30 jugadores
-        players = players[:30]
+        # Limitar players según el team_size de la guerra
+        team_size = war_context.get('team_size', 30)
+        
+        if len(members["in"]) >= team_size:
+            players = members["in"][:team_size]
+        elif len(members["in"]) < team_size:
+            players = members["in"] + members["out"]
+            players = players[:team_size]
         
         print(f"Total players available for war: {len(players)}")
-        print(f"Players IN: {len(members['in'])}, Players OUT: {len(members['out'])}")
+        print(f"War context: {war_context['war_id']}")
+        print(f"Team size: {team_size}")
 
         if not players:
             print("No players available for war attacks")
             return
 
-        attacks = generate_attacks(players)
+        # 3. Generate attacks with war context
+        attacks = generate_attacks(players, war_context)
 
         for atk in attacks:
             tag = atk["attackerTag"]
@@ -213,19 +332,19 @@ def generate_and_ingest_attacks():
 
         conn.commit()
         print(f"{len(attacks)} ataques generados e insertados en Snowflake")
+        print(f"War ID used: {war_context['war_id']}")
 
     except Exception as e:
         print("Error insertando ataques:", e)
         import traceback
         traceback.print_exc()
         conn.rollback()
-
     finally:
         cs.close()
         conn.close()
 
 # =====================================================================
-# FUNCIONES DE INGESTA ORIGINALES
+# FUNCIONES DE INGESTA ORIGINALES (mantenidas para compatibilidad)
 # =====================================================================
 
 def ingest_clan(clan_tag):
@@ -324,4 +443,5 @@ def ingest_players():
 # =====================================================================
 
 if __name__ == "__main__":
-    generate_and_ingest_attacks()
+    # generate_and_ingest_attacks()
+    ingest_players()
