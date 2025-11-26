@@ -10,7 +10,6 @@ WITH war_attacks_agg AS (
         SUM(pa.stars) as total_stars_earned,
         SUM(pa.destruction_percentage) as total_destruction
     FROM {{ ref('stg_coc_info__player_attack') }} pa
-    -- WHERE pa.clan_war_id = '7e4b388a62aa807d650aec3971950d56'
     GROUP BY clan_war_id
 ),
 

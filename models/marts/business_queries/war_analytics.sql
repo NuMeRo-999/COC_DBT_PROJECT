@@ -27,7 +27,6 @@ war_aggregated AS (
         SUM(CASE WHEN war_state = 'win' THEN 1 ELSE 0 END) as wars_won,
         SUM(CASE WHEN war_state = 'lose' THEN 1 ELSE 0 END) as wars_lost,
         SUM(CASE WHEN war_state = 'tie' THEN 1 ELSE 0 END) as wars_tied,
-        -- Para métricas promedio, excluimos guerras en preparación
         AVG(CASE WHEN war_state IN ('win', 'lose', 'tie') THEN star_efficiency_percent ELSE NULL END) as avg_star_efficiency,
         AVG(CASE WHEN war_state IN ('win', 'lose', 'tie') THEN attack_utilization_percent ELSE NULL END) as avg_attack_utilization,
         AVG(CASE WHEN war_state IN ('win', 'lose', 'tie') THEN avg_stars_per_attack ELSE NULL END) as avg_stars_per_attack,

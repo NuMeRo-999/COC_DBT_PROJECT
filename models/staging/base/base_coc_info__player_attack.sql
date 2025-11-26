@@ -14,7 +14,7 @@ WITH base_attacks AS (
         COALESCE(raw:attackNumber::INT, 1) AS attack_number,
         COALESCE(raw:mapPosition::INT, 0) AS map_position,
         raw:duration::INT AS duration,
-        raw:ingest_ts::TIMESTAMP AS attack_ts,
+        raw:ingest_ts::TIMESTAMP AS ingest_ts,
         raw:warId::VARCHAR AS war_id_from_json,
         raw:teamSize::INT AS team_size,
         raw:warStartTime::VARCHAR AS war_start_time,
@@ -46,7 +46,7 @@ final_attacks AS (
         ba.attack_number,
         ba.map_position,
         ba.duration,
-        CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS ingest_ts
+        CONVERT_TIMEZONE('UTC', ingest_ts) AS ingest_ts
     FROM base_attacks ba
     {% if is_incremental() %}
         WHERE ba.attack_ts > (SELECT MAX(ingest_ts) FROM {{ this }})

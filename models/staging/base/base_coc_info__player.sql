@@ -20,6 +20,6 @@ SELECT
     raw:heroEquipment AS raw_hero_equipment,
     raw:troops AS raw_troops,
     raw:spells AS raw_spells,
-    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS ingest_ts
+    ingest_ts
 FROM {{ source('coc_raw_info', 'player_raw') }}
 WHERE raw IS NOT NULL

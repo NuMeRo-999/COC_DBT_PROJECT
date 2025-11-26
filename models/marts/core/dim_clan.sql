@@ -16,13 +16,11 @@ SELECT
     war_losses,
     war_league,
     members,
-    -- Métricas calculadas
     CASE 
         WHEN (war_wins + war_losses + war_ties) > 0 THEN
             ROUND(war_wins * 100.0 / (war_wins + war_losses + war_ties), 2)
         ELSE 0
     END as war_win_rate,
-    -- Categorías
     CASE 
         WHEN members = 50 THEN 'Full'
         WHEN members >= 45 THEN 'Almost Full'

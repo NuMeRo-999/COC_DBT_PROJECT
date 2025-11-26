@@ -2,8 +2,8 @@
 
 WITH date_series AS (
     SELECT
-        DATEADD('day', seq4(), '2020-01-01'::DATE) as date_day
-    FROM TABLE(GENERATOR(ROWCOUNT => 365*10)) -- 10 años
+        DATEADD('day', seq4(), '2012-01-01'::DATE) as date_day
+    FROM TABLE(GENERATOR(ROWCOUNT => 365*30))
 ),
 enriched_dates AS (
     SELECT

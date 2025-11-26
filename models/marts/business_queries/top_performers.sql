@@ -8,7 +8,7 @@ WITH player_war_stats AS (
         ROUND(AVG(pa.destruction_percentage)) as avg_destruction,
         SUM(pa.stars) as total_war_stars
     FROM {{ ref('stg_coc_info__player_attack') }} pa
-    GROUP BY 1
+    GROUP BY pa.attacker_id
 ),
 
 player_progression AS (
@@ -19,7 +19,7 @@ player_progression AS (
         SUM(town_hall_change) as total_th_upgrades,
         SUM(exp_change) as total_exp_gain
     FROM {{ ref('fact_player_progression_daily') }}
-    GROUP BY 1
+    GROUP BY player_id
 ),
 
 player_rankings AS (
