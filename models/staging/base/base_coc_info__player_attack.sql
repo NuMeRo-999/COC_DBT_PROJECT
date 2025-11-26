@@ -38,7 +38,7 @@ final_attacks AS (
             COALESCE(ba.war_start_time::VARCHAR, 'NO_START') || '|' ||
             COALESCE(ba.war_end_time::VARCHAR, 'NO_END')
         ) AS attack_id,
-        MD5(war_id_from_json) AS clan_war_id,
+        war_id_from_json AS clan_war_id,
         MD5(ba.attacker_tag) AS attacker_id,
         ba.defender_tag,
         ba.stars,

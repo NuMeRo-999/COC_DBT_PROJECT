@@ -34,7 +34,7 @@ WITH current_war AS (
 
 war_log AS (
     SELECT
-        MD5(clan_tag || '-' || raw:endTime::VARCHAR) AS clan_war_id,
+        clan_tag || '-' || raw:endTime::VARCHAR AS clan_war_id,
         clan_tag AS clan_id,
         CASE 
             WHEN raw:result::VARCHAR = 'win' THEN MD5('win')
