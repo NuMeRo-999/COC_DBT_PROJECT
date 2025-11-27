@@ -135,6 +135,107 @@ models:
         data_tests:
           - not_null
 
+  - name: stg_coc_info__clan
+    description: >
+      Staging table for clan data extracted from raw JSON.
+    columns:
+    - name: clan_id
+      data_type: varchar
+      description: >
+        Unique identifier for the clan.
+      data_tests:
+        - not_null
+    - name: clan_tag
+      data_type: varchar
+      description: >
+        Clan tag.
+    - name: name
+      data_type: varchar
+      description: >
+        Clan name.
+    - name: type
+      data_type: varchar
+      description: >
+        Clan type (open, closed, etc.).
+    - name: description
+      data_type: varchar
+      description: >
+        Clan description.
+    - name: location
+      data_type: varchar
+      description: >
+        Clan location.
+    - name: is_family_friendly
+      data_type: boolean
+      description: >
+        Whether the clan is family friendly.
+    - name: badge_url
+      data_type: varchar
+      description: >
+        Clan badge URL.
+    - name: clan_level
+      data_type: int
+      description: >
+        Clan level.
+    - name: clan_points
+      data_type: int
+      description: >
+        Clan points.
+    - name: required_trophies
+      data_type: int
+      description: >
+        Required trophies to join.
+    - name: war_frequency
+      data_type: varchar
+      description: >
+        War frequency.
+    - name: war_win_streak
+      data_type: int
+      description: >
+        Current war win streak.
+    - name: war_wins
+      data_type: int
+      description: >
+        Total war wins.
+    - name: war_ties
+      data_type: int
+      description: >
+        Total war ties.
+    - name: war_losses
+      data_type: int
+      description: >
+        Total war losses.
+    - name: is_war_log_public
+      data_type: boolean
+      description: >
+        Whether war log is public.
+    - name: war_league
+      data_type: varchar
+      description: >
+        War league.
+    - name: members
+      data_type: int
+      description: >
+        Number of members.
+    - name: required_builder_base_trophies
+      data_type: int
+      description: >
+        Required builder base trophies.
+    - name: required_townhall_level
+      data_type: int
+      description: >
+        Required townhall level.
+    - name: chat_language
+      data_type: varchar
+      description: >
+        Chat language.
+    - name: ingest_ts
+      data_type: timestamp
+      description: >
+        Timestamp when data was ingested.
+      data_tests:
+        - not_null
+
   - name: stg_coc_info__clan_war
     description: >
       Combined war data from current war and war log.
