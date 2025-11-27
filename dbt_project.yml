@@ -37,12 +37,12 @@ models:
   coc_dbt_project:
     staging:
       +materialized: view
-      +schema: coc_silver_info
+      +schema: silver_info
       +database: COC_DEV_SILVER_DB
     
     marts:
       +materialized: table
-      +schema: coc_gold_info
+      +schema: gold_info
       +database: COC_DEV_GOLD_DB
       +tags: gold
     
@@ -55,4 +55,4 @@ flags:
 
 seeds:
   +database: "COC_DEV_BRONZE_DB"
-  +schema: "COC_RAW_INFO"
+  +schema: "RAW_INFO"

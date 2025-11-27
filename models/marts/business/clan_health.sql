@@ -7,8 +7,8 @@ WITH clan_activity AS (
         dc.members,
         dc.war_win_rate,
         COUNT(DISTINCT dp.player_id) as active_players,
-        AVG(dp.town_hall_level) as avg_town_hall_level,
-        AVG(dp.exp_level) as avg_exp_level,
+        ROUND(AVG(dp.town_hall_level), 2) as avg_town_hall_level,
+        ROUND(AVG(dp.exp_level), 2) as avg_exp_level,
         SUM(fpp.donations_daily) as total_donations_last_30d,
         SUM(ABS(fpp.net_donations)) as total_net_donations_last_30d
     FROM {{ ref('dim_clan') }} dc
@@ -22,8 +22,8 @@ war_performance AS (
     SELECT
         dw.clan_id,
         COUNT(DISTINCT dw.clan_war_id) as total_wars_last_30d,
-        AVG(fwp.star_efficiency_percent) as avg_star_efficiency,
-        AVG(fwp.attack_utilization_percent) as avg_attack_utilization
+        ROUND(AVG(fwp.star_efficiency_percent), 2) as avg_star_efficiency,
+        ROUND(AVG(fwp.attack_utilization_percent), 2) as avg_attack_utilization
     FROM {{ ref('dim_war') }} dw
     JOIN {{ ref('fact_war_performance') }} fwp ON dw.clan_war_id = fwp.clan_war_id
     WHERE dw.start_time >= DATEADD('day', -30, CURRENT_DATE())
@@ -33,7 +33,7 @@ war_performance AS (
 SELECT
     ca.*,
     COALESCE(wp.total_wars_last_30d, 0) as recent_war_count,
-    COALESCE(wp.avg_star_efficiency, 0) as recent_war_efficiency,
+    ROUND(COALESCE(wp.avg_star_efficiency, 0), 2) as recent_war_efficiency,
     COALESCE(wp.avg_attack_utilization, 0) as recent_attack_utilization,
     -- Health Score (0-100)
     ROUND(
@@ -44,5 +44,5 @@ SELECT
         2
     ) as clan_health_score
 FROM clan_activity ca
-LEFT JOIN war_performance wp ON ca.clan_id = wp.clan_id
+LEFT JOIN war_performance wp ON ca.clan_id = MD5(wp.clan_id)
 ORDER BY clan_health_score DESC
