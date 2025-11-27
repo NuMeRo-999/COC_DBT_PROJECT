@@ -65,3 +65,4 @@ SELECT
     duration,
     ingest_ts
 FROM final_attacks
+-- WHERE attacker_id = 'ce8bc978deae384b3225a48b8fb9dea1'

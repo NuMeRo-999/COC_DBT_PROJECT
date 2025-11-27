@@ -44,11 +44,7 @@ SELECT
     wars_won,
     wars_lost,
     wars_tied,
-    CASE 
-        WHEN (wars_won + wars_lost + wars_tied) > 0 THEN
-            ROUND(wars_won * 100.0 / (wars_won + wars_lost + wars_tied), 2)
-        ELSE 0 
-    END as win_rate,
+
     ROUND(wars_won * 100.0 / total_wars, 2) as win_rate_total,
     ROUND(COALESCE(avg_star_efficiency, 0), 2) as star_efficiency,
     ROUND(COALESCE(avg_attack_utilization, 0), 2) as attack_utilization,

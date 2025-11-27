@@ -34,13 +34,11 @@ retention_analysis AS (
         DATEDIFF('day', pla.last_activity_date, CURRENT_DATE()) as days_since_last_activity,
         pc.total_th_upgrades,
         pc.total_war_stars,
-        -- Engagement Score
         CASE 
             WHEN pla.active_days >= 30 AND pc.total_th_upgrades > 2 THEN 'High'
             WHEN pla.active_days >= 15 OR pc.total_th_upgrades > 0 THEN 'Medium'
             ELSE 'Low'
         END as engagement_level,
-        -- Retention Risk
         CASE 
             WHEN days_since_last_activity > 30 THEN 'Inactive'
             WHEN days_since_last_activity > 14 THEN 'At Risk'

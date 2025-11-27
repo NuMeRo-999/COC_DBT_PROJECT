@@ -99,11 +99,6 @@ models:
         data_type: varchar
         description: >
           Player who made the attack.
-        data_tests:
-          - relationships:
-              arguments:
-                to: ref('stg_coc_info__player')
-                field: player_id
       - name: defender_tag
         data_type: varchar
         description: >

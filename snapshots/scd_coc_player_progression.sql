@@ -6,7 +6,7 @@
         unique_key='player_id',
         strategy='timestamp',
         updated_at='ingest_ts',
-        invalidate_hard_deletes=True
+        hard_deletes='invalidate'
     )
 }}
 
