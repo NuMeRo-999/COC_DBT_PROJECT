@@ -49,7 +49,7 @@ final_attacks AS (
         CONVERT_TIMEZONE('UTC', ingest_ts) AS ingest_ts
     FROM base_attacks ba
     {% if is_incremental() %}
-        WHERE ba.attack_ts > (SELECT MAX(ingest_ts) FROM {{ this }})
+        WHERE ingest_ts > (SELECT MAX(ingest_ts) FROM {{ this }})
     {% endif %}
 )
 

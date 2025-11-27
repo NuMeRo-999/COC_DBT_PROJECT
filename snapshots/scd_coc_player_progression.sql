@@ -27,6 +27,5 @@ SELECT
     donations_received,
     clan_capital_contributions,
     ingest_ts
-FROM {{ ref('stg_coc_info__player') }}
-
+FROM {{ ref('base_coc_info__player') }}
 {% endsnapshot %}
