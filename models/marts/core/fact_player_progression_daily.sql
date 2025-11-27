@@ -2,7 +2,7 @@
 
 WITH player_daily_snapshot AS (
     SELECT
-        DATE_TRUNC('day', ingest_ts) as date_key,
+        DATE_TRUNC('day', dbt_valid_from) as date_key,
         player_id,
         town_hall_level,
         exp_level,
@@ -12,12 +12,11 @@ WITH player_daily_snapshot AS (
         donations,
         donations_received,
         clan_capital_contributions,
-        ingest_ts
+        dbt_valid_from
     FROM {{ ref('scd_coc_player_progression') }}
-    WHERE dbt_valid_to IS NULL
     QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY player_id, DATE_TRUNC('day', ingest_ts) 
-        ORDER BY ingest_ts DESC
+        PARTITION BY player_id, DATE_TRUNC('day', dbt_valid_from) 
+        ORDER BY dbt_valid_from DESC
     ) = 1
 ),
 
@@ -50,7 +49,7 @@ SELECT
     dc.war_stars,
     dc.town_hall_level - COALESCE(dc.prev_town_hall, dc.town_hall_level) as town_hall_change,
     dc.exp_level - COALESCE(dc.prev_exp, dc.exp_level) as exp_change,
-    dc.trophies - dc.prev_trophies as trophies_change,
+    dc.trophies - COALESCE(dc.prev_trophies, dc.trophies) as trophies_change,
     dc.war_stars - COALESCE(dc.prev_war_stars, dc.war_stars) as war_stars_change,
     dc.donations - COALESCE(dc.prev_donations, 0) as donations_daily,
     CASE WHEN dc.town_hall_level > COALESCE(dc.prev_town_hall, 0) THEN 1 ELSE 0 END as town_hall_upgrade_flag,
