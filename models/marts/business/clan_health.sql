@@ -35,7 +35,6 @@ SELECT
     COALESCE(wp.total_wars_last_30d, 0) as recent_war_count,
     ROUND(COALESCE(wp.avg_star_efficiency, 0), 2) as recent_war_efficiency,
     COALESCE(wp.avg_attack_utilization, 0) as recent_attack_utilization,
-    -- Health Score (0-100)
     ROUND(
         (ca.war_win_rate * 0.3) +
         (COALESCE(wp.avg_star_efficiency, 0) * 0.3) +

@@ -45,7 +45,6 @@ SELECT
     wars_lost,
     wars_tied,
 
-    ROUND(wars_won * 100.0 / total_wars, 2) as win_rate_total,
     ROUND(COALESCE(avg_star_efficiency, 0), 2) as star_efficiency,
     ROUND(COALESCE(avg_attack_utilization, 0), 2) as attack_utilization,
     ROUND(COALESCE(avg_stars_per_attack, 0), 2) as stars_per_attack,

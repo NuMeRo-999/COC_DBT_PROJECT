@@ -23,7 +23,7 @@ player_progression AS (
 ),
 
 player_rankings AS (
-    SELECT
+    SELECT DISTINCT
         dp.player_id,
         dp.player_name,
         dp.clan_name,
@@ -49,6 +49,5 @@ player_rankings AS (
 SELECT
     *,
     ROW_NUMBER() OVER (ORDER BY performance_score DESC) as overall_rank,
-    ROW_NUMBER() OVER (PARTITION BY town_hall_tier ORDER BY performance_score DESC) as tier_rank
 FROM player_rankings
 ORDER BY overall_rank
